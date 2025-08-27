@@ -8,7 +8,7 @@ import { Switch } from '../ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { cn } from '../ui/utils';
 import { 
   Share2, 
@@ -27,13 +27,15 @@ interface ShareExportModalProps {
   onOpenChange: (open: boolean) => void;
   title?: string;
   type?: 'share' | 'export';
+  onOpenDeleteModal?: () => void;
 }
 
 export function ShareExportModal({ 
   open, 
   onOpenChange, 
   title = "Untitled Analysis",
-  type = 'share'
+  type = 'share',
+  onOpenDeleteModal
 }: ShareExportModalProps) {
   const [shareMethod, setShareMethod] = useState<'link' | 'email'>('link');
   const [exportFormat, setExportFormat] = useState<'pdf' | 'ppt' | 'xlsx'>('pdf');
@@ -242,27 +244,44 @@ export function ShareExportModal({
           >
             Cancel
           </Button>
-          <Button 
-            onClick={type === 'share' ? handleShare : handleExport}
-            disabled={isGenerating}
-            className="gap-2 focus-ring"
-          >
-            {isGenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                {type === 'share' ? (
-                  <Share2 className="w-4 h-4" />
-                ) : (
-                  <Download className="w-4 h-4" />
-                )}
-                {type === 'share' ? 'Share' : 'Export'}
-              </>
+          
+          {/* Data Management Actions */}
+          <div className="flex gap-2">
+            {onOpenDeleteModal && (
+              <Button 
+                variant="outline" 
+                onClick={onOpenDeleteModal}
+                className="gap-2 focus-ring border-red-200 text-red-700 hover:bg-red-50"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Manage Data
+              </Button>
             )}
-          </Button>
+            
+            <Button 
+              onClick={type === 'share' ? handleShare : handleExport}
+              disabled={isGenerating}
+              className="gap-2 focus-ring"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  {type === 'share' ? (
+                    <Share2 className="w-4 h-4" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  {type === 'share' ? 'Share' : 'Export'}
+                </>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

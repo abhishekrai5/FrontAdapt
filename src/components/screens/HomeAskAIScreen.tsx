@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AdaaptLogo } from '../AdaabtLogo';
 import DiscoverSection from './DiscoverSection';
+import AlertsSection from './AlertsSection';
+import ProfileSettingsSection from './ProfileSettingsSection';
+import DatasetManagementModal from '../modals/DatasetManagementModal';
 
 interface HomeAskAIScreenProps {
   currentDataset: string;
@@ -18,7 +21,8 @@ export function HomeAskAIScreen({
   onComplete 
 }: HomeAskAIScreenProps) {
   const askInputRef = useRef<HTMLInputElement>(null);
-  const [activeSection, setActiveSection] = useState<'Ask AI' | 'Discover' | 'Insights'>('Ask AI');
+  const [activeSection, setActiveSection] = useState<'Ask AI' | 'Discover' | 'Insights' | 'Alerts' | 'Settings'>('Ask AI');
+  const [isDatasetManagementModalOpen, setIsDatasetManagementModalOpen] = useState(false);
 
   // Local styles for enhanced components
   const localStyles = {
@@ -521,33 +525,51 @@ export function HomeAskAIScreen({
 
           {/* Secondary Navigation Group */}
           <div className="space-y-2">
-            {secondaryNavItems.map((item, index) => (
-              <div 
-                key={index}
-                style={localStyles.enhancedNavItem}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(108, 99, 255, 0.08)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(108, 99, 255, 0.12)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <span className="nav-icon" style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {item.icon}
+            {secondaryNavItems.map((item, index) => {
+              const isActive = (item.name === 'Alerts' && activeSection === 'Alerts') || 
+                              (item.name === 'Settings' && activeSection === 'Settings');
+              return (
+                <div 
+                  key={index}
+                  style={isActive ? localStyles.enhancedNavItemActive : localStyles.enhancedNavItem}
+                  onClick={() => {
+                    if (item.name === 'Alerts') {
+                      setActiveSection('Alerts');
+                    } else if (item.name === 'Settings') {
+                      setActiveSection('Settings');
+                    } else if (item.name === 'Data sources') {
+                      // Open DatasetManagementModal when Data sources is clicked
+                      setIsDatasetManagementModalOpen(true);
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'rgba(108, 99, 255, 0.08)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(108, 99, 255, 0.12)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }
+                  }}
+                >
+                  <span className="nav-icon" style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {item.icon}
                 </span>
-                <span style={{ 
-                  fontSize: 'var(--font-meta-size)', 
-                  fontWeight: '500',
-                  flex: 1
-                }}>
-                  {item.name}
-                </span>
-              </div>
-            ))}
+                  <span style={{ 
+                    fontSize: 'var(--font-meta-size)', 
+                    fontWeight: isActive ? '600' : '500',
+                    flex: 1
+                  }}>
+                    {item.name}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </nav>
       </div>
@@ -567,6 +589,10 @@ export function HomeAskAIScreen({
         <div className="flex-1 flex items-center justify-center px-6">
           {activeSection === 'Discover' ? (
             <DiscoverSection />
+          ) : activeSection === 'Alerts' ? (
+            <AlertsSection />
+          ) : activeSection === 'Settings' ? (
+            <ProfileSettingsSection />
           ) : (
             <div className="container-home">
               {/* STRUCTURE (hero) - Enhanced heading with stronger styling */}
@@ -628,20 +654,39 @@ export function HomeAskAIScreen({
                       zIndex: 10 
                     }}></div>
                     {/* 4) Dataset pill */}
-                    <div style={{
-                      background: 'rgba(52, 48, 190, 0.14)',
-                      color: 'var(--text-strong)',
-                      borderRadius: '999px',
-                      padding: '6px 14px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      whiteSpace: 'nowrap',
-                      position: 'relative',
-                      zIndex: 10,
-                      border: '1px solid rgba(52, 48, 190, 0.18)'
-                    }}>
+                    <button
+                      onClick={() => {
+                        // Handle dataset selection - could open a modal or navigate to dataset selection
+                        console.log('Dataset button clicked:', currentDataset || 'Sales — Sample');
+                        // You can add your dataset selection logic here
+                      }}
+                      style={{
+                        background: 'rgba(52, 48, 190, 0.14)',
+                        color: 'var(--text-strong)',
+                        borderRadius: '999px',
+                        padding: '6px 14px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        whiteSpace: 'nowrap',
+                        position: 'relative',
+                        zIndex: 10,
+                        border: '1px solid rgba(52, 48, 190, 0.18)',
+                        cursor: 'pointer',
+                        transition: 'all 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(52, 48, 190, 0.20)';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(52, 48, 190, 0.16)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(52, 48, 190, 0.14)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
                       Dataset: {currentDataset || 'Sales — Sample'}
-                    </div>
+                    </button>
                     {/* 5) Enhanced arrow button */}
                     <button
                       onClick={handleSubmit}
@@ -716,6 +761,17 @@ export function HomeAskAIScreen({
           )}
         </div>
       </div>
+
+      {/* Dataset Management Modal */}
+      <DatasetManagementModal
+        isOpen={isDatasetManagementModalOpen}
+        onClose={() => setIsDatasetManagementModalOpen(false)}
+        onRequestDeletion={(deletionData) => {
+          console.log('Deletion request:', deletionData);
+          // Handle deletion request here
+          alert('Deletion request submitted successfully!');
+        }}
+      />
     </div>
   );
 }
