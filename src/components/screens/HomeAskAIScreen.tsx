@@ -4,6 +4,7 @@ import DiscoverSection from './DiscoverSection';
 import AlertsSection from './AlertsSection';
 import ProfileSettingsSection from './ProfileSettingsSection';
 import DatasetManagementModal from '../modals/DatasetManagementModal';
+import  Insights from './Insights';
 
 interface HomeAskAIScreenProps {
   currentDataset: string;
@@ -593,7 +594,10 @@ export function HomeAskAIScreen({
             <AlertsSection />
           ) : activeSection === 'Settings' ? (
             <ProfileSettingsSection />
-          ) : (
+          ) : activeSection === 'Insights' ? (
+            <Insights />
+          )
+           : (
             <div className="container-home">
               {/* STRUCTURE (hero) - Enhanced heading with stronger styling */}
               <div className="text-center mb-12">

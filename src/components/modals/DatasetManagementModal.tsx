@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import GovernedDeleteModal from './GovernedDeleteModal';
 
 interface DatasetManagementModalProps {
   isOpen: boolean;
@@ -65,6 +66,7 @@ export function DatasetManagementModal({
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'datasets' | 'deletion'>('datasets');
+  const [isGovernedDeleteOpen, setIsGovernedDeleteOpen] = useState(false);
 
   // ---- Dataset actions (kept UI exactly the same) ----
   const handleViewDataset = (dataset: Dataset) => {
@@ -100,31 +102,13 @@ export function DatasetManagementModal({
     }
   };
 
-  const handleDeleteDataset = async (dataset: Dataset) => {
-    if (!confirm(`Are you sure you want to request deletion for "${dataset.name}"? This requires admin approval.`)) {
-      return;
-    }
-    // Source-data deletion must go through admin approval
-    const approval: ApprovalRequest = {
-      action: 'delete',
-      itemType: 'dataset',
+  const handleDeleteDataset = (dataset: Dataset) => {
+    console.log('[AUDIT] Open governed delete modal from dataset row', {
       datasetId: dataset.id,
       datasetName: dataset.name,
-    };
-    console.log('[AUDIT] Delete dataset (admin approval required)', {
-      ...approval,
       time: new Date().toISOString(),
     });
-
-    try {
-      if (onCreateApprovalRequest) {
-        await onCreateApprovalRequest(approval);
-      }
-      alert(`Deletion request submitted for admin approval: ${dataset.name}`);
-    } catch (e) {
-      console.error('Failed to submit deletion approval request:', e);
-      alert('Failed to submit deletion request. Please try again.');
-    }
+    setIsGovernedDeleteOpen(true);
   };
 
   // ---- Mock dataset data (unchanged) ----
@@ -546,6 +530,22 @@ export function DatasetManagementModal({
           </div>
         </div>
       </div>
+      {/** Governed Delete Modal overlay (self-contained) */}
+      <GovernedDeleteModal
+        isOpen={isGovernedDeleteOpen}
+        onClose={() => setIsGovernedDeleteOpen(false)}
+        onRequestDeletion={async (deletionData) => {
+          try {
+            await onRequestDeletion(deletionData);
+            alert('Deletion request submitted.');
+          } catch (e) {
+            console.error('Deletion flow failed:', e);
+            alert('Failed to submit deletion.');
+          } finally {
+            setIsGovernedDeleteOpen(false);
+          }
+        }}
+      />
     </div>
   );
 }
